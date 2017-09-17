@@ -1,0 +1,17 @@
+{
+    "uuid": "ScaleSwitcher@jabi.irontec.com",
+    "description": "Change scale factor just clicking a button. Ideal for HiDPI displays on laptops when pluggin a new display.",
+    "shell-version": [
+        "3.14",
+        "3.16",
+        "3.18",
+        "3.20",
+        "3.22",
+        "3.24",
+        "3.26",
+        "3.28",
+        "3.30"
+    ],
+    "name": "Scale Switcher",
+    "version": 1
+}
