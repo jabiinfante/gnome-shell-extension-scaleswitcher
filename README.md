@@ -2,6 +2,8 @@
 
 Simple toggle window scale, just clicking a button.
 
+![Screenshot](/screenshot.png)
+
 I coded this for my 4K XPS 13, tired of opening gnome-tweak-tool whenever I plugged-in an external display.
 
 
