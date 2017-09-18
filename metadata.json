@@ -1,6 +1,6 @@
 {
     "uuid": "ScaleSwitcher@jabi.irontec.com",
-    "description": "Change window scale factor just clicking a button. Handy when plugging in an external display on a 4K laptop.",
+    "description": "Change window scale factor just clicking a button. Handy when plugging in an external display on a QHD+/4K laptop.",
     "shell-version": [
         "3.14",
         "3.16",
@@ -14,5 +14,5 @@
     ],
     "name": "Scale Switcher",
     "url": "https://github.com/jabiinfante/gnome-shell-extension-scaleswitcher",
-    "version": 1
+    "version": 1.1
 }

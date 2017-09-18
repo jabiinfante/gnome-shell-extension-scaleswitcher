@@ -2,6 +2,7 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 const PanelMenu = imports.ui.panelMenu;
 const Clutter = imports.gi.Clutter;
 
@@ -18,7 +19,7 @@ const ScaleSwitcher = new Lang.Class({
 
         this.parent(0, "ScaleSwitcher");
 
-        this.settings = new Gio.Settings({ schema_id: "org.gnome.desktop.interface" });
+        this.settings = new Gio.Settings({ schema_id: "org.gnome.settings-daemon.plugins.xsettings" });
 
         let _topBox = new St.BoxLayout();
         let gicon=Gio.icon_new_for_string(Me.path + "/icons/ruler.svg");
@@ -31,18 +32,49 @@ const ScaleSwitcher = new Lang.Class({
         _topBox.add_child(this.txt);
         this.actor.add_actor(_topBox);
 
-        this.scaleChangedId = this.settings.connect('changed::scaling-factor', Lang.bind(this, this._scaleUpdated));
+        this.scaleChangedId = this.settings.connect('changed::overrides', Lang.bind(this, this._scaleUpdated));
 
         this.actor.connect('button-press-event', Lang.bind(this, this._changeScaleFactor));
         this._scaleUpdated();
+
     },
     _scaleUpdated : function() {
-        const currentFactor = this.settings.get_uint("scaling-factor");
+        const currentFactor = this._getScaleFactor();
         this.txt.text = "×" + currentFactor;
     },
     _changeScaleFactor : function() {
-        const targetFactor = this.settings.get_uint("scaling-factor") == 1?  2 : 1;
-        this.settings.set_uint("scaling-factor", targetFactor);
+        const targetFactor = this._getScaleFactor() == 1? 2 : 1;
+
+        // Get current overrides values
+        let currentValues = this._getCurrentValues();
+
+        // We overwrite WindowScalingFactor
+        currentValues['Gdk/WindowScalingFactor'] = new GLib.Variant.new('i', targetFactor);
+
+        // Save values
+        this.settings.set_value('overrides', GLib.Variant.new('a{sv}', currentValues));
+
+    },
+    /**
+     * Get current values as a hash table of variants, in order of overwriting them
+     */
+    _getCurrentValues : function() {
+        const values = this._getOverridesUnpacked();
+        let currentValues = {};
+        for(let key of Object.keys(values)) {
+            let variantForKey = values[key].get_variant();
+            if (variantForKey !== null) {
+                currentValues[key] = variantForKey;
+            }
+        }
+        return currentValues;
+    },
+    _getScaleFactor: function() {
+        const values = this._getOverridesUnpacked();
+        return values['Gdk/WindowScalingFactor'].get_int32() || 1;
+    },
+    _getOverridesUnpacked : function() {
+        return this.settings.get_value("overrides").deep_unpack();
     },
     stop: function () {
         this.settings.disconect(this.scaleChangedId);
