@@ -32,18 +32,18 @@ const ScaleSwitcher = new Lang.Class({
         _topBox.add_child(this.txt);
         this.actor.add_actor(_topBox);
 
-        this.scaleChangedId = this.settings.connect('changed::overrides', Lang.bind(this, this._scaleUpdated));
+        this.scaleChangedId = this.settings.connect('changed::overrides', Lang.bind(this, this._scalingFactorUpdated));
 
-        this.actor.connect('button-press-event', Lang.bind(this, this._changeScaleFactor));
-        this._scaleUpdated();
+        this.actor.connect('button-press-event', Lang.bind(this, this._changeScalingFactor));
+        this._scalingFactorUpdated();
 
     },
-    _scaleUpdated : function() {
-        const currentFactor = this._getScaleFactor();
+    _scalingFactorUpdated : function() {
+        const currentFactor = this._getScalingFactor();
         this.txt.text = "×" + currentFactor;
     },
-    _changeScaleFactor : function() {
-        const targetFactor = this._getScaleFactor() == 1? 2 : 1;
+    _changeScalingFactor : function() {
+        const targetFactor = this._getScalingFactor() == 1? 2 : 1;
 
         // Get current overrides values
         let currentValues = this._getCurrentValues();
@@ -52,13 +52,18 @@ const ScaleSwitcher = new Lang.Class({
         currentValues['Gdk/WindowScalingFactor'] = new GLib.Variant.new('i', targetFactor);
 
         // Save values
-        this.settings.set_value('overrides', GLib.Variant.new('a{sv}', currentValues));
+        let v = this.settings.set_value('overrides', GLib.Variant.new('a{sv}', currentValues));
 
+
+        this._forceUpdateDesktopInterfaceScalingFactor();
+
+        this._syncSettings();
+        
     },
     /**
      * Get current values as a hash table of variants, in order of overwriting them
      */
-    _getCurrentValues : function() {
+    _getCurrentValues : function() {        
         const values = this._getOverridesUnpacked();
         let currentValues = {};
         for(let key of Object.keys(values)) {
@@ -69,12 +74,28 @@ const ScaleSwitcher = new Lang.Class({
         }
         return currentValues;
     },
-    _getScaleFactor: function() {
+    _getScalingFactor: function() {
         const values = this._getOverridesUnpacked();
         return values['Gdk/WindowScalingFactor'].get_int32() || 1;
     },
     _getOverridesUnpacked : function() {
         return this.settings.get_value("overrides").deep_unpack();
+    },
+    /**
+     * Some issues found on debian 9 with gnome-shell 3.22.3 (maybe more? maybe missing something?)
+     * org.gnome.settings-daemon.plugins.xsettings > overrides -> /Gdk/WindowScalingFactor get unsynced with
+     * org.gnome.desktop.interface > scaling-factor
+     */
+    _forceUpdateDesktopInterfaceScalingFactor : function() {
+        const settings = new Gio.Settings({ schema_id: "org.gnome.desktop.interface" }); 
+        settings.set_uint("scaling-factor", this._getScalingFactor());
+    },
+    /**
+     * Make _real_ sure settings are applied
+     * (not sure this is necessary)
+     */
+    _syncSettings: function() {
+        Gio.Settings.sync();
     },
     stop: function () {
         this.settings.disconect(this.scaleChangedId);
