@@ -58,12 +58,12 @@ const ScaleSwitcher = new Lang.Class({
         this._forceUpdateDesktopInterfaceScalingFactor();
 
         this._syncSettings();
-        
+
     },
     /**
      * Get current values as a hash table of variants, in order of overwriting them
      */
-    _getCurrentValues : function() {        
+    _getCurrentValues : function() {
         const values = this._getOverridesUnpacked();
         let currentValues = {};
         for(let key of Object.keys(values)) {
@@ -87,7 +87,7 @@ const ScaleSwitcher = new Lang.Class({
      * org.gnome.desktop.interface > scaling-factor
      */
     _forceUpdateDesktopInterfaceScalingFactor : function() {
-        const settings = new Gio.Settings({ schema_id: "org.gnome.desktop.interface" }); 
+        const settings = new Gio.Settings({ schema_id: "org.gnome.desktop.interface" });
         settings.set_uint("scaling-factor", this._getScalingFactor());
     },
     /**
@@ -96,9 +96,7 @@ const ScaleSwitcher = new Lang.Class({
      */
     _syncSettings: function() {
         Gio.Settings.sync();
-    },
-    stop: function () {
-        this.settings.disconect(this.scaleChangedId);
+        Main.wm._reset();
     }
 });
 
@@ -113,6 +111,6 @@ function enable() {
 
 
 function disable() {
-    picker.stop();
     picker.destroy();
+    Main.wm._reset();
 }
