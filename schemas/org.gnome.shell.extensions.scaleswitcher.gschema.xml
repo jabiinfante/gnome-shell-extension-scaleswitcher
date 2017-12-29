@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions-scaleswitcher">
+  <schema id="org.gnome.shell.extensions.scaleswitcher" path="/org/gnome/shell/extensions/scaleswitcher/">
+    <key type="b" name="show-icon">
+      <default>false</default>
+      <summary>show icon on the top bar</summary>
+      <description>Show a video display icon next to the x1/x2 text label</description>
+    </key>
+  </schema>
+</schemalist>

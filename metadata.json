@@ -14,5 +14,6 @@
     ],
     "name": "Scale Switcher",
     "url": "https://github.com/jabiinfante/gnome-shell-extension-scaleswitcher",
-    "version": 1.1
+    "version": 5,
+    "settings-schema": "org.gnome.shell.extensions.scaleswitcher"
 }
